@@ -3,6 +3,7 @@ use bevy::{
     prelude::{Entity, Query},
 };
 
+/// Extension trait for a read-only `Query`.
 pub trait TwoEntitiesQueryExt<'world, Data, Filter = ()>
 where
     Data: ReadOnlyQueryData,
@@ -46,6 +47,7 @@ where
     }
 }
 
+/// Extension trait for a mutable `Query`.
 pub trait TwoEntitiesMutQueryExt<'world, Data, Filter = ()>
 where
     Data: QueryData,

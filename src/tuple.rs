@@ -5,8 +5,8 @@ use bevy::{
 
 use crate::query::{TwoEntitiesMutQueryExt, TwoEntitiesQueryExt};
 
-// Extension trait for working with tuples of queries
-pub trait TupleQueryExt<'world, DataA, DataB, FilterA = (), FilterB = ()>
+/// Extension trait for working with tuples of queries.
+pub trait TupleQueryExt<'world_a, 'world_b, DataA, DataB, FilterA = (), FilterB = ()>
 where
     DataA: QueryData,
     DataB: QueryData,
@@ -18,11 +18,11 @@ where
     fn get_both(&self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
 }
 
-impl<'world, 'state, DataA, DataB, FilterA, FilterB>
-    TupleQueryExt<'world, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+    TupleQueryExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     for (
-        &Query<'world, 'state, DataA, FilterA>,
-        &Query<'world, 'state, DataB, FilterB>,
+        &Query<'world_a, 'state_a, DataA, FilterA>,
+        &Query<'world_b, 'state_b, DataB, FilterB>,
     )
 where
     DataA: ReadOnlyQueryData,
@@ -44,7 +44,7 @@ where
     }
 }
 
-// Extension trait for working with tuples of queries
+/// Extension trait for working with tuples of mutable queries.
 pub trait TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA = (), FilterB = ()>
 where
     DataA: QueryData,

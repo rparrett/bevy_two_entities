@@ -1,6 +1,6 @@
 # bevy_two_entities
 
-A tiny crate offering a few convenience traits for working with Bevy queries and tuples of Entities.
+A tiny crate offering a few convenience traits for bevy Queries.
 
 ```rust
 fn system(
