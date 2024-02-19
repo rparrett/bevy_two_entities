@@ -3,20 +3,16 @@
 A tiny crate offering a few convenience traits for bevy Queries.
 
 ```rust
-fn system(
+fn system_three(
     collisions: Query<&Collision>,
-    mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
-    mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
+    players: Query<Entity, (With<Player>, Without<Enemy>)>,
+    enemies: Query<(), (With<Enemy>, Without<Player>)>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for collision in &collisions {
-        let mut queries = (&mut players, &mut enemies);
-        let Some((mut player, mut enemy)) = queries.get_both_mut(collision.0, collision.1)
-        else {
-            continue;
-        };
-
-        player.0 -= 1;
-        enemy.0 -= 1;
+        if (&players, &enemies).both(collision.0, collision.1) {
+            next_state.set(GameState::GameOver);
+        }
     }
 }
 ```
