@@ -42,6 +42,37 @@ where
     }
 }
 
+// Extension trait for working with tuples of queries
+pub trait TupleQueryMutExt<'world, DataA, DataB, FilterA = (), FilterB = ()>
+where
+    DataA: QueryData,
+    DataB: QueryData,
+{
+    /// Returns Some((a, b)) if both match either `self.0` or `self.1`.
+    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
+}
+
+impl<'world, 'state, DataA, DataB, FilterA, FilterB>
+    TupleQueryMutExt<'world, DataA, DataB, FilterA, FilterB>
+    for (
+        &mut Query<'world, 'state, DataA, FilterA>,
+        &mut Query<'world, 'state, DataB, FilterB>,
+    )
+where
+    DataA: QueryData,
+    DataB: QueryData,
+    FilterA: QueryFilter,
+    FilterB: QueryFilter,
+{
+    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)> {
+        let (item_a, other) = self.0.get_either_mut_with_other(a, b)?;
+
+        let item_b = self.1.get_mut(other).ok()?;
+
+        Some((item_a, item_b))
+    }
+}
+
 pub trait TwoEntitiesQueryExt<'world, Data, Filter = ()>
 where
     Data: ReadOnlyQueryData,
@@ -246,6 +277,61 @@ mod tests {
     }
 
     #[test]
+    fn get_both_mut() {
+        #[derive(Component, Debug, PartialEq, Eq)]
+        struct A(u32);
+        #[derive(Component, Debug, PartialEq, Eq)]
+        struct B(u32);
+        #[derive(Component, Debug, PartialEq, Eq)]
+        struct C(u32);
+
+        let mut world = World::new();
+        let a = world.spawn(A(1)).id();
+        let b = world.spawn(B(2)).id();
+        let c = world.spawn(C(3)).id();
+
+        {
+            let mut system_state: SystemState<(Query<&mut A>, Query<&mut B>, Query<&mut C>)> =
+                SystemState::new(&mut world);
+
+            let (mut query_a, mut query_b, mut query_c) = system_state.get_mut(&mut world);
+
+            {
+                let mut queries = (&mut query_a, &mut query_c);
+                assert!(queries.get_both_mut(a, b).is_none());
+                assert!(queries.get_both_mut(b, a).is_none());
+            }
+
+            {
+                let mut queries = (&mut query_a, &mut query_b);
+                assert!(queries.get_both_mut(a, c).is_none());
+                assert!(queries.get_both_mut(c, b).is_none());
+
+                let (mut a_item, mut b_item) = queries.get_both_mut(a, b).unwrap();
+
+                assert_eq!(*a_item, A(1));
+                assert_eq!(*b_item, B(2));
+
+                a_item.0 = 10;
+                b_item.0 = 20;
+            }
+        }
+
+        {
+            let mut system_state: SystemState<(Query<&mut A>, Query<&mut B>, Query<&mut C>)> =
+                SystemState::new(&mut world);
+
+            let (mut query_a, mut query_b, mut _query_c) = system_state.get_mut(&mut world);
+
+            let mut queries = (&mut query_a, &mut query_b);
+            let (a_item, b_item) = queries.get_both_mut(b, a).unwrap();
+
+            assert_eq!(*a_item, A(10));
+            assert_eq!(*b_item, B(20));
+        }
+    }
+
+    #[test]
     fn example() {
         #[derive(Component)]
         struct HitPoints(u32);
@@ -258,8 +344,8 @@ mod tests {
 
         fn _system(
             collisions: Query<&Collision>,
-            mut players: Query<&mut HitPoints, With<Player>>,
-            mut enemies: Query<&mut HitPoints, With<Enemy>>,
+            mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
+            mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
         ) {
             for collision in &collisions {
                 if let Some((mut player, other)) =
@@ -270,6 +356,23 @@ mod tests {
                         enemy.0 -= 1;
                     }
                 }
+            }
+        }
+
+        fn _system_two(
+            collisions: Query<&Collision>,
+            mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
+            mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
+        ) {
+            for collision in &collisions {
+                let mut queries = (&mut players, &mut enemies);
+                let Some((mut player, mut enemy)) = queries.get_both_mut(collision.0, collision.1)
+                else {
+                    continue;
+                };
+
+                player.0 -= 1;
+                enemy.0 -= 1;
             }
         }
     }
