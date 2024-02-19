@@ -256,11 +256,11 @@ mod tests {
         fn system_three(
             collisions: Query<&Collision>,
             players: Query<Entity, (With<Player>, Without<Enemy>)>,
-            lava: Query<(), (With<Enemy>, Without<Player>)>,
+            enemies: Query<(), (With<Enemy>, Without<Player>)>,
             mut next_state: ResMut<NextState<GameState>>,
         ) {
             for collision in &collisions {
-                if (&players, &lava).both(collision.0, collision.1) {
+                if (&players, &enemies).both(collision.0, collision.1) {
                     next_state.set(GameState::GameOver);
                 }
             }
