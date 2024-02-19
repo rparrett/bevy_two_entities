@@ -266,9 +266,24 @@ mod tests {
             }
         }
 
+        fn system_four(
+            collisions: Query<&Collision>,
+            players: Query<(), With<Player>>,
+            mut enemies: Query<&mut HitPoints, With<Enemy>>,
+        ) {
+            for collision in &collisions {
+                let mut queries = (&players, &mut enemies);
+                let Some((_, mut enemy)) = queries.get_both_mut(collision.0, collision.1) else {
+                    continue;
+                };
+
+                enemy.0 -= 1;
+            }
+        }
+
         App::new()
             .init_state::<GameState>()
-            .add_systems(Update, (system_one, system_two, system_three))
+            .add_systems(Update, (system_one, system_two, system_three, system_four))
             .run();
     }
 }
