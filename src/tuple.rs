@@ -213,6 +213,11 @@ mod tests {
         struct Player;
         #[derive(Component)]
         struct Enemy;
+        #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+        enum GameState {
+            #[default]
+            GameOver,
+        }
 
         fn _system(
             collisions: Query<&Collision>,
@@ -245,6 +250,20 @@ mod tests {
 
                 player.0 -= 1;
                 enemy.0 -= 1;
+            }
+        }
+
+        fn _system_three(
+            collisions: Query<&Collision>,
+            players: Query<Entity, (With<Player>, Without<Enemy>)>,
+            lava: Query<(), (With<Enemy>, Without<Player>)>,
+            mut next_state: ResMut<NextState<GameState>>,
+        ) {
+            for collision in &collisions {
+                let queries = (&players, &lava);
+                if queries.both(collision.0, collision.1) {
+                    next_state.set(GameState::GameOver);
+                }
             }
         }
 
