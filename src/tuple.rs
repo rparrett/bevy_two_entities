@@ -247,5 +247,7 @@ mod tests {
                 enemy.0 -= 1;
             }
         }
+
+        // TODO actually run systems
     }
 }

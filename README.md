@@ -5,18 +5,18 @@ A tiny crate offering a few convenience traits for working with Bevy queries and
 ```rust
 fn system(
     collisions: Query<&Collision>,
-    mut players: Query<&mut HitPoints, With<Player>>,
-    mut enemies: Query<&mut HitPoints, With<Enemy>>,
+    mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
+    mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
 ) {
     for collision in &collisions {
-        if let Some((mut player, other)) =
-            players.get_either_mut_with_other(collision.0, collision.1)
-        {
-            if let Ok(mut enemy) = enemies.get_mut(other) {
-                player.0 -= 1;
-                enemy.0 -= 1;
-            }
-        }
+        let mut queries = (&mut players, &mut enemies);
+        let Some((mut player, mut enemy)) = queries.get_both_mut(collision.0, collision.1)
+        else {
+            continue;
+        };
+
+        player.0 -= 1;
+        enemy.0 -= 1;
     }
 }
 ```
