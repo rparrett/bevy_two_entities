@@ -5,8 +5,8 @@ A tiny crate offering a few convenience traits for bevy Queries.
 ```rust
 fn system_three(
     collisions: Query<&Collision>,
-    players: Query<Entity, (With<Player>, Without<Enemy>)>,
-    enemies: Query<(), (With<Enemy>, Without<Player>)>,
+    players: Query<(), With<Player>>,
+    enemies: Query<(), With<Enemy>>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     for collision in &collisions {
