@@ -204,13 +204,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_get_either"
-version = "0.1.0"
-dependencies = [
- "bevy",
-]
-
-[[package]]
 name = "bevy_hierarchy"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -380,6 +373,13 @@ dependencies = [
  "bevy_math",
  "bevy_reflect",
  "thiserror",
+]
+
+[[package]]
+name = "bevy_two_entities"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
