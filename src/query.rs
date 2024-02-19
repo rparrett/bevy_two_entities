@@ -122,9 +122,9 @@ mod tests {
 
         let query = system_state.get_mut(&mut world);
 
-        assert_eq!(query.either(a, b), true);
-        assert_eq!(query.either(b, a), true);
-        assert_eq!(query.either(b, c), false);
+        assert!(query.either(a, b));
+        assert!(query.either(b, a));
+        assert!(!query.either(b, c));
 
         assert_eq!(query.either_with_other(a, b), Some(b));
         assert_eq!(query.either_with_other(b, a), Some(b));
