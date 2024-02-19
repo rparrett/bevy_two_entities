@@ -219,7 +219,7 @@ mod tests {
             GameOver,
         }
 
-        fn _system(
+        fn system_one(
             collisions: Query<&Collision>,
             mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
             mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
@@ -236,7 +236,7 @@ mod tests {
             }
         }
 
-        fn _system_two(
+        fn system_two(
             collisions: Query<&Collision>,
             mut players: Query<&mut HitPoints, (With<Player>, Without<Enemy>)>,
             mut enemies: Query<&mut HitPoints, (With<Enemy>, Without<Player>)>,
@@ -253,20 +253,22 @@ mod tests {
             }
         }
 
-        fn _system_three(
+        fn system_three(
             collisions: Query<&Collision>,
             players: Query<Entity, (With<Player>, Without<Enemy>)>,
             lava: Query<(), (With<Enemy>, Without<Player>)>,
             mut next_state: ResMut<NextState<GameState>>,
         ) {
             for collision in &collisions {
-                let queries = (&players, &lava);
-                if queries.both(collision.0, collision.1) {
+                if (&players, &lava).both(collision.0, collision.1) {
                     next_state.set(GameState::GameOver);
                 }
             }
         }
 
-        // TODO actually run systems
+        App::new()
+            .init_state::<GameState>()
+            .add_systems(Update, (system_one, system_two, system_three))
+            .run();
     }
 }
