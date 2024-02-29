@@ -273,11 +273,11 @@ mod tests {
         ) {
             for collision in &collisions {
                 let mut queries = (&players, &mut enemies);
-                let Some((_, mut enemy)) = queries.get_both_mut(collision.0, collision.1) else {
+                let Some((_, mut enemy_hp)) = queries.get_both_mut(collision.0, collision.1) else {
                     continue;
                 };
 
-                enemy.0 -= 1;
+                enemy_hp.0 -= 1;
             }
         }
 
