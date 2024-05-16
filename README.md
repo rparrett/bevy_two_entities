@@ -2,6 +2,8 @@
 
 A tiny crate offering a few convenience traits on Bevy's `Query` and `(&Query, &Query)` for scenarios involving exactly two entities.
 
+## Examples
+
 ```rust
 fn game_over(
     collisions: Query<&Collision>,
