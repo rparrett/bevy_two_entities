@@ -35,3 +35,9 @@ fn damage_enemy(
     }
 }
 ```
+
+## Compatibility
+
+| `bevy_two_entities` | `bevy` |
+| :--                 | :--    |
+| `0.1`               | `0.13` |
