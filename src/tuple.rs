@@ -120,7 +120,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bevy::{ecs::system::SystemState, prelude::*};
+    use bevy::{ecs::system::SystemState, prelude::*, state::app::StatesPlugin};
 
     #[test]
     fn both() {
@@ -282,6 +282,7 @@ mod tests {
         }
 
         App::new()
+            .add_plugins(StatesPlugin)
             .init_state::<GameState>()
             .add_systems(Update, (system_one, system_two, system_three, system_four))
             .run();
