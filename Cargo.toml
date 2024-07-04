@@ -15,7 +15,11 @@ exclude = [".github"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.13", default-features = false }
+bevy = { version = "0.14", default-features = false }
+
+[dev-dependencies]
+# bevy_state is needed for tests
+bevy = { version = "0.14", default-features = false, features = ["bevy_state"] }
 
 [lints.rust]
 missing_docs = "forbid"
