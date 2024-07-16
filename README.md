@@ -1,5 +1,9 @@
 # bevy_two_entities
 
+[![crates.io](https://img.shields.io/crates/v/bevy_two_entities.svg)](https://crates.io/crates/bevy_two_entities)
+[![docs](https://docs.rs/bevy_two_entities/badge.svg)](https://docs.rs/bevy_two_entities)
+[![Following released Bevy versions](https://img.shields.io/badge/Bevy%20tracking-released%20version-lightblue)](https://bevyengine.org/learn/book/plugin-development/#main-branch-tracking)
+
 A tiny crate offering a few convenience traits on Bevy's `Query` and `(&Query, &Query)` for scenarios involving exactly two entities.
 
 ## Examples
