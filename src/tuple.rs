@@ -18,11 +18,11 @@ where
     fn get_both(&self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
 }
 
-impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     TupleQueryExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     for (
-        &Query<'world_a, 'state_a, DataA, FilterA>,
-        &Query<'world_b, 'state_b, DataB, FilterB>,
+        &Query<'world_a, '_, DataA, FilterA>,
+        &Query<'world_b, '_, DataB, FilterB>,
     )
 where
     DataA: ReadOnlyQueryData,
@@ -54,11 +54,11 @@ where
     fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
 }
 
-impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     for (
-        &mut Query<'world_a, 'state_a, DataA, FilterA>,
-        &mut Query<'world_b, 'state_b, DataB, FilterB>,
+        &mut Query<'world_a, '_, DataA, FilterA>,
+        &mut Query<'world_b, '_, DataB, FilterB>,
     )
 where
     DataA: QueryData,
@@ -75,11 +75,11 @@ where
     }
 }
 
-impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     for (
-        &mut Query<'world_a, 'state_a, DataA, FilterA>,
-        &Query<'world_b, 'state_b, DataB, FilterB>,
+        &mut Query<'world_a, '_, DataA, FilterA>,
+        &Query<'world_b, '_, DataB, FilterB>,
     )
 where
     DataA: QueryData,
@@ -96,11 +96,11 @@ where
     }
 }
 
-impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
     for (
-        &Query<'world_a, 'state_a, DataA, FilterA>,
-        &mut Query<'world_b, 'state_b, DataB, FilterB>,
+        &Query<'world_a, '_, DataA, FilterA>,
+        &mut Query<'world_b, '_, DataB, FilterB>,
     )
 where
     DataA: ReadOnlyQueryData,
