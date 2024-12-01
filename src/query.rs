@@ -18,8 +18,8 @@ where
     fn get_either_with_other(&self, a: Entity, b: Entity) -> Option<(Data::Item<'_>, Entity)>;
 }
 
-impl<'world, 'state, Data, Filter> TwoEntitiesQueryExt<'world, Data, Filter>
-    for Query<'world, 'state, Data, Filter>
+impl<'world, Data, Filter> TwoEntitiesQueryExt<'world, Data, Filter>
+    for Query<'world, '_, Data, Filter>
 where
     Data: ReadOnlyQueryData,
     Filter: QueryFilter,
@@ -62,8 +62,8 @@ where
     ) -> Option<(Data::Item<'_>, Entity)>;
 }
 
-impl<'world, 'state, Data, Filter> TwoEntitiesMutQueryExt<'world, Data, Filter>
-    for Query<'world, 'state, Data, Filter>
+impl<'world, Data, Filter> TwoEntitiesMutQueryExt<'world, Data, Filter>
+    for Query<'world, '_, Data, Filter>
 where
     Data: QueryData,
     Filter: QueryFilter,
