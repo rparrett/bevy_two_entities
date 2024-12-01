@@ -1,6 +1,6 @@
 [package]
 name = "bevy_two_entities"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "A few convenience traits for working with Bevy Queries"
@@ -15,11 +15,11 @@ exclude = [".github"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.14", default-features = false }
+bevy = { version = "0.15", default-features = false }
 
 [dev-dependencies]
 # bevy_state is needed for tests
-bevy = { version = "0.14", default-features = false, features = ["bevy_state"] }
+bevy = { version = "0.15", default-features = false, features = ["bevy_state"] }
 
 [lints.rust]
 missing_docs = "forbid"
