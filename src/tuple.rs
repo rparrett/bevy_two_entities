@@ -6,7 +6,7 @@ use bevy::{
 use crate::query::{TwoEntitiesMutQueryExt, TwoEntitiesQueryExt};
 
 /// Extension trait for working with tuples of queries.
-pub trait TupleQueryExt<'world_a, 'world_b, DataA, DataB, FilterA = (), FilterB = ()>
+pub trait TupleQueryExt<'state_a, 'state_b, DataA, DataB, FilterA = (), FilterB = ()>
 where
     DataA: QueryData,
     DataB: QueryData,
@@ -15,14 +15,18 @@ where
     fn both(&self, a: Entity, b: Entity) -> bool;
 
     /// Returns Some((a, b)) if both match either `self.0` or `self.1`.
-    fn get_both(&self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
+    fn get_both<'world>(
+        &'world self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'world, 'state_a>, DataB::Item<'world, 'state_b>)>;
 }
 
-impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
-    TupleQueryExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+    TupleQueryExt<'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
     for (
-        &Query<'world_a, '_, DataA, FilterA>,
-        &Query<'world_b, '_, DataB, FilterB>,
+        &Query<'world_a, 'state_a, DataA, FilterA>,
+        &Query<'world_b, 'state_b, DataB, FilterB>,
     )
 where
     DataA: ReadOnlyQueryData,
@@ -34,7 +38,11 @@ where
         self.0.either(a, b) && self.1.either(a, b)
     }
 
-    fn get_both(&self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)> {
+    fn get_both<'query>(
+        &'query self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'query, 'state_a>, DataB::Item<'query, 'state_b>)> {
         self.0
             .get_either_with_other(a, b)
             .and_then(|(item_a, other)| match self.1.get(other) {
@@ -45,20 +53,24 @@ where
 }
 
 /// Extension trait for working with tuples of mutable queries.
-pub trait TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA = (), FilterB = ()>
+pub trait TupleQueryMutExt<'state_a, 'state_b, DataA, DataB, FilterA = (), FilterB = ()>
 where
     DataA: QueryData,
     DataB: QueryData,
 {
     /// Returns Some((a, b)) if both match either `self.0` or `self.1`.
-    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)>;
+    fn get_both_mut<'world>(
+        &'world mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'world, 'state_a>, DataB::Item<'world, 'state_b>)>;
 }
 
-impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
-    TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+    TupleQueryMutExt<'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
     for (
-        &mut Query<'world_a, '_, DataA, FilterA>,
-        &mut Query<'world_b, '_, DataB, FilterB>,
+        &mut Query<'world_a, 'state_a, DataA, FilterA>,
+        &mut Query<'world_b, 'state_b, DataB, FilterB>,
     )
 where
     DataA: QueryData,
@@ -66,7 +78,11 @@ where
     FilterA: QueryFilter,
     FilterB: QueryFilter,
 {
-    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)> {
+    fn get_both_mut<'query>(
+        &'query mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'query, 'state_a>, DataB::Item<'query, 'state_b>)> {
         let (item_a, other) = self.0.get_either_mut_with_other(a, b)?;
 
         let item_b = self.1.get_mut(other).ok()?;
@@ -75,11 +91,11 @@ where
     }
 }
 
-impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
-    TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+    TupleQueryMutExt<'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
     for (
-        &mut Query<'world_a, '_, DataA, FilterA>,
-        &Query<'world_b, '_, DataB, FilterB>,
+        &mut Query<'world_a, 'state_a, DataA, FilterA>,
+        &Query<'world_b, 'state_b, DataB, FilterB>,
     )
 where
     DataA: QueryData,
@@ -87,7 +103,11 @@ where
     FilterA: QueryFilter,
     FilterB: QueryFilter,
 {
-    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)> {
+    fn get_both_mut<'query>(
+        &'query mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'query, 'state_a>, DataB::Item<'query, 'state_b>)> {
         let (item_a, other) = self.0.get_either_mut_with_other(a, b)?;
 
         let item_b = self.1.get(other).ok()?;
@@ -96,11 +116,11 @@ where
     }
 }
 
-impl<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
-    TupleQueryMutExt<'world_a, 'world_b, DataA, DataB, FilterA, FilterB>
+impl<'world_a, 'world_b, 'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
+    TupleQueryMutExt<'state_a, 'state_b, DataA, DataB, FilterA, FilterB>
     for (
-        &Query<'world_a, '_, DataA, FilterA>,
-        &mut Query<'world_b, '_, DataB, FilterB>,
+        &Query<'world_a, 'state_a, DataA, FilterB>,
+        &mut Query<'world_b, 'state_b, DataB, FilterA>,
     )
 where
     DataA: ReadOnlyQueryData,
@@ -108,7 +128,11 @@ where
     FilterA: QueryFilter,
     FilterB: QueryFilter,
 {
-    fn get_both_mut(&mut self, a: Entity, b: Entity) -> Option<(DataA::Item<'_>, DataB::Item<'_>)> {
+    fn get_both_mut<'query>(
+        &'query mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(DataA::Item<'query, 'state_a>, DataB::Item<'query, 'state_b>)> {
         let (item_a, other) = self.0.get_either_with_other(a, b)?;
 
         let item_b = self.1.get_mut(other).ok()?;

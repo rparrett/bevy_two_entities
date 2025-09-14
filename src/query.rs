@@ -4,7 +4,7 @@ use bevy::{
 };
 
 /// Extension trait for a read-only `Query`.
-pub trait TwoEntitiesQueryExt<'world, Data, Filter = ()>
+pub trait TwoEntitiesQueryExt<'state, Data, Filter = ()>
 where
     Data: ReadOnlyQueryData,
 {
@@ -13,13 +13,18 @@ where
     /// Returns `Some(other_entity)` if either entity matches the Query.
     fn either_with_other(&self, a: Entity, b: Entity) -> Option<Entity>;
     /// Returns the first Query item that matches, or `None` if neither matches.
-    fn get_either(&self, a: Entity, b: Entity) -> Option<Data::Item<'_>>;
+    fn get_either<'world>(&'world self, a: Entity, b: Entity)
+    -> Option<Data::Item<'world, 'state>>;
     /// Returns the first Query item that matches and the other entity, or `None` if neither matches.
-    fn get_either_with_other(&self, a: Entity, b: Entity) -> Option<(Data::Item<'_>, Entity)>;
+    fn get_either_with_other<'world>(
+        &'world self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(Data::Item<'world, 'state>, Entity)>;
 }
 
-impl<'world, Data, Filter> TwoEntitiesQueryExt<'world, Data, Filter>
-    for Query<'world, '_, Data, Filter>
+impl<'world, 'state, Data, Filter> TwoEntitiesQueryExt<'state, Data, Filter>
+    for Query<'world, 'state, Data, Filter>
 where
     Data: ReadOnlyQueryData,
     Filter: QueryFilter,
@@ -35,11 +40,19 @@ where
             .ok()
     }
 
-    fn get_either(&self, a: Entity, b: Entity) -> Option<Data::Item<'_>> {
+    fn get_either<'query>(
+        &'query self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<Data::Item<'query, 'state>> {
         self.get(a).or_else(|_| self.get(b)).ok()
     }
 
-    fn get_either_with_other(&self, a: Entity, b: Entity) -> Option<(Data::Item<'_>, Entity)> {
+    fn get_either_with_other<'query>(
+        &'query self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(Data::Item<'query, 'state>, Entity)> {
         self.get(a)
             .map(|item| (item, b))
             .or_else(|_| self.get(b).map(|item| (item, a)))
@@ -48,27 +61,35 @@ where
 }
 
 /// Extension trait for a mutable `Query`.
-pub trait TwoEntitiesMutQueryExt<'world, Data, Filter = ()>
+pub trait TwoEntitiesMutQueryExt<'state, Data, Filter = ()>
 where
     Data: QueryData,
 {
     /// Returns the first Query item that matches, or `None` if neither matches.
-    fn get_either_mut(&mut self, a: Entity, b: Entity) -> Option<Data::Item<'_>>;
-    /// Returns the first Query item that matches and the other entity, or `None` if neither matches.
-    fn get_either_mut_with_other(
-        &mut self,
+    fn get_either_mut<'world>(
+        &'world mut self,
         a: Entity,
         b: Entity,
-    ) -> Option<(Data::Item<'_>, Entity)>;
+    ) -> Option<Data::Item<'world, 'state>>;
+    /// Returns the first Query item that matches and the other entity, or `None` if neither matches.
+    fn get_either_mut_with_other<'world>(
+        &'world mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<(Data::Item<'world, 'state>, Entity)>;
 }
 
-impl<'world, Data, Filter> TwoEntitiesMutQueryExt<'world, Data, Filter>
-    for Query<'world, '_, Data, Filter>
+impl<'world, 'state, Data, Filter> TwoEntitiesMutQueryExt<'state, Data, Filter>
+    for Query<'world, 'state, Data, Filter>
 where
     Data: QueryData,
     Filter: QueryFilter,
 {
-    fn get_either_mut(&mut self, a: Entity, b: Entity) -> Option<Data::Item<'_>> {
+    fn get_either_mut<'query>(
+        &'query mut self,
+        a: Entity,
+        b: Entity,
+    ) -> Option<Data::Item<'query, 'state>> {
         let either = if self.get(a).is_ok() {
             a
         } else if self.get(b).is_ok() {
@@ -80,11 +101,11 @@ where
         self.get_mut(either).ok()
     }
 
-    fn get_either_mut_with_other(
-        &mut self,
+    fn get_either_mut_with_other<'query>(
+        &'query mut self,
         a: Entity,
         b: Entity,
-    ) -> Option<(Data::Item<'_>, Entity)> {
+    ) -> Option<(Data::Item<'query, 'state>, Entity)> {
         let (item_entity, other_entity) = if self.get(a).is_ok() {
             (a, b)
         } else if self.get(b).is_ok() {
