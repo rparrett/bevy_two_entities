@@ -251,12 +251,10 @@ mod tests {
             for collision in &collisions {
                 if let Some((mut player, other)) =
                     players.get_either_mut_with_other(collision.0, collision.1)
-                {
-                    if let Ok(mut enemy) = enemies.get_mut(other) {
+                    && let Ok(mut enemy) = enemies.get_mut(other) {
                         player.0 -= 1;
                         enemy.0 -= 1;
                     }
-                }
             }
         }
 
