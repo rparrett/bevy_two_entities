@@ -1,6 +1,6 @@
 [package]
 name = "bevy_two_entities"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "A few convenience traits for working with Bevy Queries"
@@ -20,11 +20,11 @@ std = ["bevy/std"]
 libm = ["bevy/libm"]
 
 [dependencies]
-bevy = { version = "0.17.0", default-features = false }
+bevy = { version = "0.18.0", default-features = false }
 
 [dev-dependencies]
 # bevy_state is needed for tests
-bevy = { version = "0.17.0", default-features = false, features = [
+bevy = { version = "0.18.0", default-features = false, features = [
     "bevy_state",
 ] }
 
