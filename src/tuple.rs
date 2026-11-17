@@ -180,7 +180,7 @@ mod tests {
         let mut system_state: SystemState<(Query<Entity, With<A>>, Query<Entity, With<B>>)> =
             SystemState::new(&mut world);
 
-        let (query_a, query_b) = system_state.get_mut(&mut world);
+        let (query_a, query_b) = system_state.get_mut(&mut world).unwrap();
 
         assert!((&query_a, &query_b).both(a, b));
         assert!((&query_a, &query_b).both(b, a));
@@ -204,7 +204,7 @@ mod tests {
 
         let mut system_state: SystemState<(Query<(), With<A>>, Query<(), With<B>>)> =
             SystemState::new(&mut world);
-        let (query_a, query_b) = system_state.get_mut(&mut world);
+        let (query_a, query_b) = system_state.get_mut(&mut world).unwrap();
         let queries = (&query_a, &query_b);
 
         assert!(!queries.both(ab, neither));
@@ -228,7 +228,7 @@ mod tests {
         let c = world.spawn_empty().id();
 
         let mut system_state: SystemState<(Query<&A>, Query<&B>)> = SystemState::new(&mut world);
-        let (query_a, query_b) = system_state.get_mut(&mut world);
+        let (query_a, query_b) = system_state.get_mut(&mut world).unwrap();
         let queries = (&query_a, &query_b);
 
         assert_eq!(queries.get_both(a, b), Some((&A(1), &B(2))));
@@ -264,7 +264,7 @@ mod tests {
         let mut system_state: SystemState<(Query<(Entity, &mut A)>, Query<(Entity, &mut B)>)> =
             SystemState::new(&mut world);
         {
-            let (mut query_a, mut query_b) = system_state.get_mut(&mut world);
+            let (mut query_a, mut query_b) = system_state.get_mut(&mut world).unwrap();
             for (first, second, expected) in cases {
                 {
                     let read_a = query_a.as_readonly();
@@ -340,7 +340,7 @@ mod tests {
             let mut system_state: SystemState<(Query<&mut A>, Query<&mut B>, Query<&mut C>)> =
                 SystemState::new(&mut world);
 
-            let (mut query_a, mut query_b, mut query_c) = system_state.get_mut(&mut world);
+            let (mut query_a, mut query_b, mut query_c) = system_state.get_mut(&mut world).unwrap();
 
             {
                 let mut queries = (&mut query_a, &mut query_c);
@@ -367,7 +367,8 @@ mod tests {
             let mut system_state: SystemState<(Query<&mut A>, Query<&mut B>, Query<&mut C>)> =
                 SystemState::new(&mut world);
 
-            let (mut query_a, mut query_b, mut _query_c) = system_state.get_mut(&mut world);
+            let (mut query_a, mut query_b, mut _query_c) =
+                system_state.get_mut(&mut world).unwrap();
 
             let mut queries = (&mut query_a, &mut query_b);
             let (a_item, b_item) = queries.get_both_mut(b, a).unwrap();
