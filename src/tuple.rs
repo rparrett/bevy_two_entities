@@ -11,10 +11,15 @@ where
     DataA: QueryData,
     DataB: QueryData,
 {
-    /// Returns true if `a` and `b` both match either `self.0` or `self.1`.
+    /// Returns `true` if one input entity matches `self.0` and the other matches
+    /// `self.1`, in either order.
     fn both(&self, a: Entity, b: Entity) -> bool;
 
-    /// Returns Some((a, b)) if both match either `self.0` or `self.1`.
+    /// Returns query items in `(self.0, self.1)` order for the two input entities.
+    ///
+    /// Selects the first entity matching `self.0`, trying `a` before `b`, then
+    /// queries the other entity with `self.1`. Returns `None` if either lookup
+    /// fails. If both entities match `self.0`, the opposite pairing is not retried.
     fn get_both<'world>(
         &'world self,
         a: Entity,
@@ -35,7 +40,7 @@ where
     FilterB: QueryFilter,
 {
     fn both(&self, a: Entity, b: Entity) -> bool {
-        self.0.either(a, b) && self.1.either(a, b)
+        (self.0.contains(a) && self.1.contains(b)) || (self.0.contains(b) && self.1.contains(a))
     }
 
     fn get_both<'query>(
@@ -58,7 +63,11 @@ where
     DataA: QueryData,
     DataB: QueryData,
 {
-    /// Returns Some((a, b)) if both match either `self.0` or `self.1`.
+    /// Returns mutable query items in `(self.0, self.1)` order for the two input entities.
+    ///
+    /// Selects the first entity matching `self.0`, trying `a` before `b`, then
+    /// queries the other entity with `self.1`. Returns `None` if either lookup
+    /// fails. If both entities match `self.0`, the opposite pairing is not retried.
     fn get_both_mut<'world>(
         &'world mut self,
         a: Entity,
@@ -170,6 +179,54 @@ mod tests {
         assert!(!(&query_a, &query_b).both(a, c));
         assert!(!(&query_a, &query_b).both(c, b));
         assert!(!(&query_a, &query_b).both(a, a));
+    }
+
+    #[test]
+    fn both_with_overlapping_queries() {
+        #[derive(Component)]
+        struct A;
+        #[derive(Component)]
+        struct B;
+
+        let mut world = World::new();
+        let a = world.spawn(A).id();
+        let b = world.spawn(B).id();
+        let ab = world.spawn((A, B)).id();
+        let neither = world.spawn_empty().id();
+
+        let mut system_state: SystemState<(Query<(), With<A>>, Query<(), With<B>>)> =
+            SystemState::new(&mut world);
+        let (query_a, query_b) = system_state.get_mut(&mut world);
+        let queries = (&query_a, &query_b);
+
+        assert!(!queries.both(ab, neither));
+        assert!(!queries.both(neither, ab));
+        assert!(queries.both(ab, a));
+        assert!(queries.both(a, ab));
+        assert!(queries.both(ab, b));
+        assert!(queries.both(b, ab));
+    }
+
+    #[test]
+    fn get_both() {
+        #[derive(Component, Debug, PartialEq, Eq)]
+        struct A(u32);
+        #[derive(Component, Debug, PartialEq, Eq)]
+        struct B(u32);
+
+        let mut world = World::new();
+        let a = world.spawn(A(1)).id();
+        let b = world.spawn(B(2)).id();
+        let c = world.spawn_empty().id();
+
+        let mut system_state: SystemState<(Query<&A>, Query<&B>)> = SystemState::new(&mut world);
+        let (query_a, query_b) = system_state.get_mut(&mut world);
+        let queries = (&query_a, &query_b);
+
+        assert_eq!(queries.get_both(a, b), Some((&A(1), &B(2))));
+        assert_eq!(queries.get_both(b, a), Some((&A(1), &B(2))));
+        assert_eq!(queries.get_both(a, c), None);
+        assert_eq!(queries.get_both(c, b), None);
     }
 
     #[test]
