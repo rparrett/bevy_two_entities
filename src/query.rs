@@ -141,7 +141,7 @@ mod tests {
 
         let mut system_state: SystemState<Query<Entity, With<A>>> = SystemState::new(&mut world);
 
-        let query = system_state.get_mut(&mut world);
+        let query = system_state.get_mut(&mut world).unwrap();
 
         assert!(query.either(a, b));
         assert!(query.either(b, a));
@@ -178,7 +178,7 @@ mod tests {
 
         let mut system_state: SystemState<Query<&mut Val, With<A>>> = SystemState::new(&mut world);
 
-        let mut query = system_state.get_mut(&mut world);
+        let mut query = system_state.get_mut(&mut world).unwrap();
 
         assert_eq!(query.get_either_mut(a, b).map(|inner| *inner), Some(Val(1)));
         assert_eq!(query.get_either_mut(b, a).map(|inner| *inner), Some(Val(1)));
